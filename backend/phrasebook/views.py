@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from . import machine_translate
+from . import broad_translate, machine_translate
 from .matching import find_phrase
 from .models import Language, Phrase
 from .serializers import LanguageSerializer
@@ -40,6 +40,10 @@ class TranslateView(APIView):
         if not phrase:
             if machine_translate.supports(from_code, to_code):
                 translation = machine_translate.translate(text, from_code, to_code)
+                if translation:
+                    return Response({'status': 'ok', 'translation': translation, 'source': 'machine_translation'})
+            if broad_translate.supports(from_code, to_code):
+                translation = broad_translate.translate(text, from_code, to_code)
                 if translation:
                     return Response({'status': 'ok', 'translation': translation, 'source': 'machine_translation'})
             return Response({'status': 'no-match'})

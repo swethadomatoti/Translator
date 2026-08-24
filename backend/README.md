@@ -36,3 +36,21 @@ creating a superuser (`python manage.py createsuperuser`).
 
 CORS is open to `http://localhost:5173` / `http://127.0.0.1:5173` (the Vite
 dev server) in `config/settings.py`.
+
+## Machine translation fallback
+
+When `/api/translate/` doesn't find an exact phrasebook match, it falls back
+to machine translation, tried in two tiers:
+
+1. **Argos Translate** (`machine_translate.py`) — fast, offline, but only
+   covers en/hi/es/fr pairs. Install its models with
+   `python manage.py install_mt_models`.
+2. **NLLB-200** (`broad_translate.py`) — offline, covers all languages in
+   `phrasebook/data.py` (including Telugu/Tamil/Kannada/Malayalam, which Argos
+   has no models for). Much heavier: ~2.4GB download, noticeably more RAM/CPU
+   per request than Argos. Install/cache it with
+   `python manage.py install_broad_mt_model`. Run this once during setup/build
+   — otherwise it downloads on the first request that needs it, which is slow.
+
+Both are no-API-key, no-cost, fully local models — there's no external
+translation service involved.
